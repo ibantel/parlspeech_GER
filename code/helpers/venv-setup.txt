@@ -1,0 +1,16 @@
+# venv setup
+#      Create Conda Environment: in PyCharm, go to
+#           Settings -> Project: XX -> Python Interpreter -> gear icon (top-right)
+#           -> Add -> select Conda Environment -> New environment -> specify folder path -> Ok -> Ok
+#
+# install packages
+#   run anaconda prompt as admin
+#   activate venv by name: conda activate envname
+#   activate venv by location: conda activate [path]
+#   install required packages, e.g.: pip install spacy
+# install spacy corpus
+#   run anaconda prompt as admin
+#   activate venv by name: conda activate envname
+#   activate venv by location: conda activate [path]
+#   input python -m spacy download de_core_news_lg
+
