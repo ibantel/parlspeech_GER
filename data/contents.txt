@@ -1,0 +1,7 @@
+This folder contains
+- raw data
+- preprocessed data
+- emotion dictionary
+
+
+These are omitted from GitHub due to file size.
