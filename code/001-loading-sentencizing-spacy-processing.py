@@ -22,25 +22,17 @@
 
 # %% (0) load dependencies
 
-import datetime as dt
-import nltk
-import numpy as np
-import os
-import pandas as pd
-import pickle
 import spacy
+
+import pandas as pd
 import timeit
 
 # costum helpers
-from helpers.party_dict import party_remapping as hlp_party_remapping
-from helpers.sentencize_df_explode import sentencize_df_explode as hlp_sentencize_df_explode
-from helpers.chunked_pickle_save_load import chunked_save_as_pickles as hlp_chunked_save_as_pickles
 
 # spacy corpus
 nlp = spacy.load("de_core_news_lg")  # to install: [s above]
 
 # base folder
-from helpers.folder_base import folder_base
 folder_base: str = r"C:\Users\Bantel\Documents\GitHub-repos\parlspeech_GER"
 
 # %% (1) Load data

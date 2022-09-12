@@ -3,11 +3,8 @@
 """
 
 # %% Loading Packages
-import ast
 import bios
-from collections import Counter
 import functools
-import numpy as np
 import operator
 
 if __name__ != "__main__":
@@ -92,39 +89,11 @@ neg_emo         = [[{"IS_SENT_START": True, "LOWER": {"IN": only_neg_words}}], [
 neg_emo_negated = [[{"LOWER": {"IN": negations}}, {"LOWER": {"IN": only_neg_words}}]]
 pos_emo_negated = [[{"LOWER": {"IN": negations}}, {"LOWER": {"IN": only_pos_words}}]]
 
-#%% Define function for aggregation of patterns
-
-
-def count_tup_first_values(lst, values):
-    """ Takes in list of tuples. Returns count of occurences of different values at position 0 of the tuples
-        Example:
-            lst: list = [(101, 0, 2), (102, 4, 6), (101, 8, 10)]
-            values: [101, 102, 103]
-            return: pd.Series(index=[0,1], data={0: 2, 1: 1})
-
-    :param lst: list of tuples
-    :param values: list of values to be aggregated
-    :return: pd.Series
-
-    """
-
-    counts = Counter({n: 0 for n in values})  # initialize the counts to zero for every element of values
-
-    if len(lst) == 0:
-        return pd.Series(counts)  # if value is NaN: return zero counts
-
-    # lst = ast.literal_eval(lst_str)  # convert string to list if input is
-
-    counts.update(x for x, *_ in lst if x in values)  # update counts based on 1st element of each tuple
-
-    return pd.Series(counts) # return series of counts
-
-
 #%% Testing
 
 if False:
 
-# %% setup
+    # %% setup
     print("Testing matcher")
     import pandas as pd
     import spacy
@@ -190,6 +159,8 @@ if False:
     print("aggregating")
 
     # df_tmp['matches_emo'] = df_tmp['matches_emo'].astype("string")  # convert to str ## NOT NEEDED ANYMORE
+
+    from count_tup_first_values import count_tup_first_values
 
     # extract values & rejoin
     df_tmp = df_tmp.join(

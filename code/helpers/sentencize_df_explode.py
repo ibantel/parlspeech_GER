@@ -2,8 +2,8 @@
     This file: sentencize & explode data set
 """
 
-import pandas as pd
 import nltk
+import pandas as pd
 import timeit
 
 

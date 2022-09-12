@@ -8,14 +8,14 @@
 
 # %% Load packages
 
-import numpy as np
-import os
 import spacy
+
+import os
 from datetime import datetime as dt
+
 nlp = spacy.load("de_core_news_lg")
 
 # base folder
-from helpers.folder_base import folder_base
 folder_base: str = r"C:\Users\Bantel\Documents\GitHub-repos\parlspeech_GER"
 
 
@@ -23,7 +23,6 @@ folder_base: str = r"C:\Users\Bantel\Documents\GitHub-repos\parlspeech_GER"
 from helpers.chunked_pickle_save_load import chunked_load_from_pickles
 from helpers.ed8_patterns import *
 from helpers.parties_patterns import *  # del afdnn, afdpn, b90nn, b90pn, cdunn, cdupn, csunn, csupn, fdpnn, fdppn, lnknn, lnkpn, spdnn, spdpn  # if needed b/c of old version
-from helpers.face_validity_inspection import inspect_face_validity
 from helpers.validation_helpers import token_from_spacy_match
 
 

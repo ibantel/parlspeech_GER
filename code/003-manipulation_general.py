@@ -6,25 +6,27 @@
 """
 
 
-# %% Load packages & import costum helpers
-from collections import Counter
-from datetime import datetime as dt
-import matplotlib.pyplot as plt
+import spacy
+
 import numpy as np
 import os
 import pandas as pd
-import spacy
+# %% Load packages & import costum helpers
+from datetime import datetime as dt
 
 nlp = spacy.load("de_core_news_lg")
 
 try:
+    from helpers.ed8_patterns import *
     from helpers.parties_patterns import *
+    from helpers.ed8_patterns import count_tup_first_values
+    from helpers.validation_helpers import token_from_spacy_match
 except ModuleNotFoundError:
     print("failed to load modules. do so manually and fix")
 
 # %% Load data
 try:
-    from helpers.folder_base import *
+    from code.helpers.folder_base import *
 except ModuleNotFoundError:
     folder_base: str = 'C:\\Users\\Bantel\\Documents\\GitHub-repos\\parlspeech_GER'
 
@@ -121,10 +123,10 @@ agenda_patterns_govt_chnc: list = [[{'TEXT':  {'REGEX': '(Bundes)?(K|k)anzler(in
 agenda_patterns_govt_mnst: list = [[{'TEXT':  {'REGEX': '(Bundes)?(M|m)inister(in)?'}}]]
 
 # add matcher patterns
-agenda_matcher_govt.add(  1, agenda_patterns_breg_breg)
-agenda_matcher_govt.add(  1, agenda_patterns_breg_coal)
-agenda_matcher_govt.add(  2, agenda_patterns_breg_chnc)
-agenda_matcher_govt.add(  3, agenda_patterns_breg_mnst)
+agenda_matcher_govt.add(  1, agenda_patterns_govt_breg)
+agenda_matcher_govt.add(  1, agenda_patterns_govt_coal)
+agenda_matcher_govt.add(  2, agenda_patterns_govt_chnc)
+agenda_matcher_govt.add(  3, agenda_patterns_govt_mnst)
 
 govt_values: tuple = (1, 2, 3)
 govt_column_mapper: dict = {  1: "govt_government",
@@ -175,7 +177,7 @@ bt_long_speeches['agenda_clean'].fillna(bt_long_speeches['agenda'], inplace=True
 
 del bt_long_speeches['agenda']
 
-# %% Apply matcher
+# %% Apply matchers
 
 testing: bool = False
 if testing:
@@ -189,7 +191,7 @@ if testing:
 
 bt_long_speeches.loc[:, 'agenda_processed'] = [doc for doc in nlp.pipe(bt_long_speeches['agenda_clean'].tolist())]  # faster than apply
 bt_long_speeches.loc[:, 'matches_meta'] = bt_long_speeches['agenda_processed'].apply(agenda_matcher_meta)  # match patterns
-bt_long_speeches.loc[:, 'matches_govt'] = bt_long_speeches['agenda_processed'].apply(agenda_matcher_breg)  # match patterns
+bt_long_speeches.loc[:, 'matches_govt'] = bt_long_speeches['agenda_processed'].apply(agenda_matcher_govt)  # match patterns
 bt_long_speeches.loc[:, 'matches_fctn'] = bt_long_speeches['agenda_processed'].apply(agenda_matcher_fctn)  # match patterns
 
 # %% Clean matches
@@ -201,26 +203,39 @@ bt_long_speeches = bt_long_speeches.join(bt_long_speeches['matches_meta'].apply(
     count_tup_first_values, args=(meta_values,)))  # aggregate emo matches: extract values & rejoin
 bt_long_speeches = bt_long_speeches.rename(columns=meta_column_mapper)  # optional columns renaming
 
+bt_long_speeches['matchwords_meta'] =\
+        bt_long_speeches.apply(lambda x: token_from_spacy_match(x['matches_meta'], x['agenda_processed']), axis=1)
+
 # govt
 bt_long_speeches = bt_long_speeches.join(bt_long_speeches['matches_govt'].apply(
     count_tup_first_values, args=(govt_values,)))  # aggregate emo matches: extract values & rejoin
 bt_long_speeches = bt_long_speeches.rename(columns=govt_column_mapper)  # optional columns renaming
+
+bt_long_speeches['matchwords_govt'] =\
+        bt_long_speeches.apply(lambda x: token_from_spacy_match(x['matches_govt'], x['agenda_processed']), axis=1)
 
 # fctn
 bt_long_speeches = bt_long_speeches.join(bt_long_speeches['matches_fctn'].apply(
     count_tup_first_values, args=(fctn_values,)))  # aggregate emo matches: extract values & rejoin
 bt_long_speeches = bt_long_speeches.rename(columns=fctn_column_mapper)  # optional columns renaming
 
+bt_long_speeches['matchwords_fctn'] =\
+        bt_long_speeches.apply(lambda x: token_from_spacy_match(x['matches_fctn'], x['agenda_processed']), axis=1)
+
 # combine govt
 bt_long_speeches['govt'] = np.where(((bt_long_speeches['govt_government'] + bt_long_speeches['govt_chancellor'] + bt_long_speeches['govt_minister']) > 0), 1, 0)
 
-# clean up
-bt_long_speeches.drop(columns=['govt_government', 'govt_chancellor', 'govt_minister',
-                      'agenda_processed', 'agenda_clean', 'matches_meta', 'matches_govt', 'matches_fctn'],
-             inplace=True)
 
 # %% Save intermediary result
+save_path_name: str = folder_base + "\data\\3-matching-out\\" + dt.now().strftime("%Y-%m-%d-%H%M")
+filename: str = "_bt_all_debates_emo_agenda_"
 
-filename: str = "bt_all_debates_emo_agenda_numeric.csv"
+# save full csv file
+bt_long_speeches.to_csv(save_path_name + filename + "full.csv")
 
-bt_long_speeches.to_csv(folder_base + "\data\\3-matching-out\\" + dt.now().strftime("%Y-%m-%d-%H%M") + "_" + filename)
+# save numeric columns only
+bt_long_speeches.\
+    drop(columns=['matchwords_meta', 'matchwords_govt', 'matchwords_fctn',
+                  'govt_government', 'govt_chancellor', 'govt_minister',
+                  'agenda_processed', 'agenda_clean', 'matches_meta', 'matches_govt', 'matches_fctn']).\
+    to_csv(save_path_name + filename + "numeric.csv")
