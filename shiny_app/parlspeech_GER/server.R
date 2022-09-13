@@ -9,23 +9,36 @@
 
 library(shiny)
 library(tidyverse)
-# speeches_full <- read_csv("C:/Users/bantel/Documents/GitHub-repos/parlspeech_GER/data/3-matching-out/2022-09-10-1503_bt_all_debates_emo_agenda_full.csv")
-speeches_num <- read_csv("C:/Users/bantel/Documents/GitHub-repos/parlspeech_GER/data/3-matching-out/2022-09-10-1503_bt_all_debates_emo_agenda_numeric.csv")
+
+speeches_num <- 
+  read_csv("C:/Users/bantel/Documents/GitHub-repos/parlspeech_GER/shiny_app/parlspeech_GER/data/2022-09-10-1503_bt_all_debates_emo_agenda_numeric.csv") %>% select(-`...1`)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
-
-    output$hist_plot <- renderPlot({
-      ggplot(speeches_num %>% 
-               filter(date > as.Date(input$date_range[1]) & date < as.Date(input$date_range[2])),
-             aes(x=date, y=pos_emo)) +
-        geom_bar(stat="identity")
-
+  # data
+  datasetInput <- reactive({
+    speeches_num %>% 
+      # filter
+      filter(origin_pty %in% input$origin_pty)
+      #filter(date > as.Date(input$date_range[1]) & date < as.Date(input$date_range[2]))
     })
-
+  
+  # generate a summary of the dataset
+  output$summary <- renderPrint({
+    dataset <- datasetInput()
+    summary(dataset$neg_emo)
+  })
+  
+  # plot
+  output$bar_plot <-
+    renderPlot({
+      dataset <- datasetInput()
+      
+      ggplot(data=dataset, aes(x=neg_emo)) +
+        geom_histogram(bins = input$n_breaks_hist) + 
+        ggtitle(paste0("Histogram of ", "neg_emo ", "between ", 
+                       as.Date(input$date_range[1]) %>% format(., "%d %B %Y"), " and ",
+                       as.Date(input$date_range[2]) %>% format(., "%d %B %Y"))) +
+        theme_bw()
+    })
 })
-
-# next:
-# - make barchart where pos_emo goes up, while neg_emo goes down
-# - make linechart with smoothable mentions (two lines: pos & neg)
-# - speaker differentiation
