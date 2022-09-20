@@ -9,15 +9,12 @@ The data is
 - split into sentences which are transformed into `spaCy` objects 
 (`001-[...].py`) and
 - on which a lookup of negative emotive language is applied (`002-[...]).py`; based on Valentim & Widmann 2021)
-
 <!-- 
-
 `next steps`
 - afterwards, the data is clustered into the ministry ressorts (policy areas) and negative language differentiated by policy area and origin party
 - next, also look at open discourse data to do analyses based on speaker characteristics
-
 -->
-
+- the results are presented in a shiny app
 <br><br><br><br>
 
 ## References
