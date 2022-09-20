@@ -9,13 +9,14 @@ The data is
 - split into sentences which are transformed into `spaCy` objects 
 (`001-[...].py`) and
 - on which a lookup of negative emotive language is applied (`002-[...]).py`; based on Valentim & Widmann 2021)
+- the results are presented in a shiny app (https://ivo-bantel.shinyapps.io/parlspeech_GER)
 <!-- 
 `next steps`
 - afterwards, the data is clustered into the ministry ressorts (policy areas) and negative language differentiated by policy area and origin party
 - next, also look at open discourse data to do analyses based on speaker characteristics
 -->
-- the results are presented in a shiny app
 <br><br><br><br>
+
 
 ## References
 Rauh, Christian & Schwalbach, Jan (2020): The ParlSpeech V2 data set: Full-text corpora of 6.3 million parliamentary speeches in the key legislative chambers of nine representative democracies, _Dataverse_. https://doi.org/10.7910/DVN/L4OAKN.
