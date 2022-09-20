@@ -116,7 +116,7 @@ ui <- fluidPage(
         
         # GEN - origin party----
         h4("Speaker parties"),
-        orderInput(inputId = "gen_originpty_display", label=HTML("<h5>display (order-sensitive):</h5>"), 
+        orderInput(inputId = "gen_originpty_display", label=HTML("<h5>Display (order-sensitive):</h5>"), 
                    placeholder="Drag items here...",
                    width="100%",
                    connect="gen_originpty_discard",
@@ -127,7 +127,7 @@ ui <- fluidPage(
                              "Die Linke" = "lnk", 
                              "AfD" = "afd")
         ),
-        orderInput(inputId = "gen_originpty_discard", label=HTML("<h5>ignore:</h5>"), 
+        orderInput(inputId = "gen_originpty_discard", label=HTML("<h5>Ignore:</h5>"), 
                    placeholder="Drag items here...",
                    width="100%", 
                    connect="gen_originpty_display",
@@ -149,13 +149,26 @@ ui <- fluidPage(
                                      value =15,
                                      ticks=FALSE)
         ),
-        # SPKR - top_x speakers
+        # SPKR - top_x speakers----
         conditionalPanel(condition="input.gen_plottype == 'spkr_simp'",
                          sliderInput(inputId="topx_spkr", label = h4("No. of speakers to display:"),
                                      min   =  2,
                                      max   = 25,
                                      value = 10
-                                     ))
+                                     )),
+        
+        # SPKR - speaker by name----
+        conditionalPanel(condition="input.gen_plottype == 'spkr_simp'",
+                         textInput(inputId="text_spkr", label = h4("Search additional speaker to display:"),
+                                   value = "",
+                                   placeholder = "Type here to add"
+                         )),
+        conditionalPanel(condition="input.gen_plottype == 'spkr_simp'",
+                         sliderInput(inputId="textspkr_no", label=h4("Number of found speakers to display"),
+                                     min=0, max=5,
+                                     value=2))
+        
+        
       )
       },
     
@@ -195,6 +208,14 @@ server <- function(input, output, session) {
                        )}
   )
   
+  observeEvent(
+    input$text_spkr,
+    {
+      if(input$text_spkr == ""){updateSliderInput(session = session, inputId = "textspkr_no", value = 0)}
+      if(input$text_spkr != ""){updateSliderInput(session = session, inputId = "textspkr_no", value = 2)}
+    }
+  )
+  
   # construct data_freq dataset
   dataset_freq <- reactive({
     speeches_num %>% 
@@ -226,8 +247,7 @@ server <- function(input, output, session) {
   # construct data_speaker dataset
   dataset_speaker <- reactive({
     speeches_num %>% 
-      # filter rows
-      filter(origin_pty %in% input$gen_originpty_display) %>% 
+      # filter rows on date
       filter( (date > input$gen_daterange[1]) & (date < input$gen_daterange[2])) %>% 
       # re-order factors
       mutate(origin_pty = fct_relevel(origin_pty, input$gen_originpty_display)) %>% 
@@ -321,10 +341,35 @@ server <- function(input, output, session) {
     output$spkr_plot <-
       renderPlot({
         
-        dataset <- dataset_speaker() %>% 
+        dataset <- 
+          bind_rows(
+            # top_x speakers
+            dataset_speaker() %>% 
+              filter(origin_pty %in% input$gen_originpty_display) %>% 
+              arrange(appeal_number %>% desc()) %>% # arrange by values
+              head(input$topx_spkr) # get top X
+            ,
+            
+            # specified speaker
+            dataset_speaker() %>%
+              filter(str_detect(speaker, input$text_spkr)) %>% 
+              arrange(speaker %>% desc()) %>% 
+              head(input$textspkr_no)
+          ) %>% 
+          
           arrange(appeal_number %>% desc()) %>% # arrange by values
-          head(input$topx_spkr) %>% # get top X
-          mutate(speaker = as_factor(speaker)) # save order in factor levels
+          mutate(speaker = as_factor(speaker) %>% fct_relevel(., 
+                                                              # names of manually selected speakers
+                                                              c(
+                                                                dataset_speaker() %>% 
+                                                                  filter(str_detect(speaker, input$text_spkr)) %>% 
+                                                                  arrange(appeal_number) %>% 
+                                                                  head(input$textspkr_no) %>% 
+                                                                  select(speaker)
+                                                                ), 
+                                                              after = Inf # move to the end
+                                                              )) # save order in factor levels
+        
 
         ggplot(data=dataset, aes(y=speaker, x=appeal_number, color=origin_pty)) +
           
