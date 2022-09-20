@@ -8,7 +8,7 @@ library(zoo)
 {
   
   speeches_num <- 
-    read_csv("C:/Users/bantel/Documents/GitHub-repos/parlspeech_GER/shiny_app/parlspeech_GER/data/2022-09-10-1503_bt_all_debates_emo_agenda_numeric.csv") %>% 
+    read_csv("./data/2022-09-10-1503_bt_all_debates_emo_agenda_numeric.csv") %>% 
     select(-`...1`) %>% 
     mutate(abs_neg_emo = (neg_emo / speech_terms * 100),
            agg_emo     = (pos_emo / speech_terms * 100) + (( -1 * neg_emo) / speech_terms * 100),
@@ -58,7 +58,8 @@ ui <- fluidPage(
   
   # Application title
   titlePanel("Emotive parliamentary speech in the German Bundestag"),
-  helpText("Plot occurrence of emotive parliamentary speech over time"),
+  #helpText("Plot occurrence of emotive parliamentary speech over time"),
+  helpText(HTML("For background, see <a href='https://github.com/ibantel/parlspeech_GER' target='_blank'>https://github.com/ibantel/parlspeech_GER</a>.")),
   br(),
   
   # Sidebar

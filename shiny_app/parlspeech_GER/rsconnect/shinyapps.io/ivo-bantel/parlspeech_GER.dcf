@@ -1,0 +1,14 @@
+name: parlspeech_GER
+title: parlspeech_GER
+username:
+account: ivo-bantel
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7066515
+bundleId: 6320732
+url: https://ivo-bantel.shinyapps.io/parlspeech_GER/
+when: 1663693315.94877
+lastSyncTime: 1663693315.94877
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .Renviron|app_v3.R
