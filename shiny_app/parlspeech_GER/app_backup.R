@@ -6,8 +6,8 @@ library(zoo)
 
 # Load data
 {
-
-speeches_num <- 
+  
+  speeches_num <- 
     read_csv("C:/Users/bantel/Documents/GitHub-repos/parlspeech_GER/shiny_app/parlspeech_GER/data/2022-09-10-1503_bt_all_debates_emo_agenda_numeric.csv") %>% 
     select(-`...1`) %>% 
     mutate(abs_neg_emo = neg_emo,
@@ -15,26 +15,26 @@ speeches_num <-
            agg_emo = pos_emo + neg_emo) %>% 
     # select columns
     select(c(date, origin_pty, abs_neg_emo, pos_emo, neg_emo, agg_emo))
-    
-
-# Define needed objects
-dict_vars <- c("agg_emo"="Aggregate", 
-               "abs_neg_emo"="Negative", 
-               "negpos_emo" = "Neg. & pos. appeals",
-               "neg_emo" = "Negative appeals",
-               "pos_emo"="Positive")
-
-scale_f_pties <- 
-  scale_fill_manual(
-    labels=c("CDU/CSU", "SPD", "Greens", "FDP", "Left", "AfD"),
-    values=c("cxu"=partycolor(1375), 
-             "spd"=partycolor( 383), 
-             "b90"=partycolor(1816), 
-             "fdp"=partycolor( 573), 
-             "lnk"=partycolor(1545), 
-             "afd"=partycolor(1976))
-  )
-
+  
+  
+  # Define needed objects
+  dict_vars <- c("agg_emo"="Aggregate", 
+                 "abs_neg_emo"="Negative", 
+                 "negpos_emo" = "Neg. & pos. appeals",
+                 "neg_emo" = "Negative appeals",
+                 "pos_emo"="Positive")
+  
+  scale_f_pties <- 
+    scale_fill_manual(
+      labels=c("CDU/CSU", "SPD", "Greens", "FDP", "Left", "AfD"),
+      values=c("cxu"=partycolor(1375), 
+               "spd"=partycolor( 383), 
+               "b90"=partycolor(1816), 
+               "fdp"=partycolor( 573), 
+               "lnk"=partycolor(1545), 
+               "afd"=partycolor(1976))
+    )
+  
 }
 
 # Define UI for application that draws a histogram
@@ -205,9 +205,9 @@ server <- function(input, output, session) {
         
         # finish freq_plot
         freq_p +
-          scale_f_pties + 
           
-          ylab("Count") + 
+          # additional manipulations (axes etc.)
+          scale_f_pties + 
           scale_x_continuous(name=paste0(dict_vars[input$freq_simp_var], " emotive appeals per speech"),
                              limits=  c(input$freq_cutoffs[1]-1, input$freq_cutoffs[2]+1),
                              # display the lower bound as tick; then in steps of five
@@ -220,14 +220,11 @@ server <- function(input, output, session) {
                                  input$freq_cutoffs[2],
                                  # steps
                                  5))) +
-          
-          ggtitle(paste0(dict_vars[input$freq_simp_var], " emotive appeals per speech\n(", 
-                         input$gen_daterange[1] %>% as.yearmon(.), "\u2013",
-                         input$gen_daterange[2] %>% as.yearmon(.), ")")) +
-          labs(caption=paste0("n = ", nrow(dataset), " speeches\n")) + 
+          labs(y="Count", caption=paste0("n = ", nrow(dataset), " speeches\n")) + 
+          ggtitle(paste0(dict_vars[input$freq_simp_var], " emotive appeals per speech\n(", input$gen_daterange[1] %>% as.yearmon(.), "\u2013", input$gen_daterange[2] %>% as.yearmon(.), ")")) +
           theme_minimal() +
           theme(legend.position="bottom") + 
-          guides(fill=guide_legend(title = "Speaker party", nrow=1,byrow=TRUE))
+          guides(fill=guide_legend(title = "Speaker party", nrow=1, byrow=TRUE))
         
       })
     
@@ -235,6 +232,8 @@ server <- function(input, output, session) {
     output$time_plot <-
       renderPlot({
         
+        # variable selection
+        {
         if(input$freq_time_var=="agg_emo"){
           dataset <- dataset_time() %>% filter(appeal_valence == "aggregated")
         }
@@ -247,19 +246,20 @@ server <- function(input, output, session) {
         if(input$freq_time_var=="pos_emo"){
           dataset <- dataset_time() %>% filter(appeal_valence == "positive")
         }
-        
+        }
         
         
         ggplot(data=dataset, aes(x=date, y=appeal_number, color=appeal_valence, fill=origin_pty)) + 
           geom_bar(stat = "identity", size=0) +
-          
           geom_hline(yintercept = 0, color="white", size=1) +
           
+          scale_f_pties +
           scale_color_discrete(guide="none") + 
-          scale_f_pties + 
-          theme_minimal()
-        
-        
+          labs(x="Date", y="Appeals per speech") + 
+          ggtitle(paste0(dict_vars[input$freq_time_var], " emotive appeals per speech\n(", input$gen_daterange[1] %>% as.yearmon(.), "\u2013", input$gen_daterange[2] %>% as.yearmon(.), ")")) +
+          theme_minimal() +
+          theme(legend.position="bottom") +
+          guides(fill=guide_legend(title = "Speaker party", nrow=1, byrow=TRUE))
         
       })
   
