@@ -139,7 +139,9 @@ govt_column_mapper: dict = {  1: "govt_government",
 agenda_matcher_fctn = spacy.matcher.Matcher(nlp.vocab)  # instantiate Matcher
 
 agenda_patterns_fctn_afd: list = [[{'LOWER':  {'IN':    ['afd', 'alternative für deutschland']}}]]
-agenda_patterns_fctn_b90: list = [[{'LOWER':  {'IN':    ['(bündnis 90', 'die grünen)']}}]]
+agenda_patterns_fctn_b90: list = [[{'LOWER':  {'IN':    ['(bündnis 90', 'die grünen)']}}],
+                                  [{'TEXT': {'REGEX': '(B.ndnis)|(Gr.ne(n)?)'}}]
+                                  ]
 agenda_patterns_fctn_cxu: list = [[{'TEXT' :  {'REGEX':  '(C|c)(D|d|S|s)(U|u)'}}],
                                   [{'TEXT' :  {'REGEX':  'CDU/\s*CSU'}}],
                                   [{'TEXT' :  {'REGEX':  'Union(s)?(\-)?\s*(F|f)raktion'}}]]
