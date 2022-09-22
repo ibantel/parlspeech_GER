@@ -4,11 +4,11 @@ csv
 rds
 /data/
 /.idea/
-/shiny_app/parlspeech_GER/app_v1.R
-/shiny_app/parlspeech_GER/app_v2.R
-/shiny_app/parlspeech_GER/app_v3.R
-/shiny_app/parlspeech_GER/app_v4.R
-/shiny_app/parlspeech_GER/.Renviron
+/shiny_app/app_v1.R
+/shiny_app/app_v2.R
+/shiny_app/app_v3.R
+/shiny_app/app_v4.R
+/shiny_app/.Renviron
 
 
 
